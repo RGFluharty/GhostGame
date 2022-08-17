@@ -262,7 +262,7 @@ MonoBehaviour:
   - {x: 0.31517458, y: -0.821012, z: 0}
   m_ShapePathHash: 1470504677
   m_Mesh: {fileID: 0}
-  m_InstanceId: -104266
+  m_InstanceId: -1352
 --- !u!114 &8342554820484392979
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -369,6 +369,7 @@ MonoBehaviour:
   controller: {fileID: 8342554820484392979}
   runSpeed: 25
   footstepSound: {fileID: 0}
+  cutsceneObject: {fileID: 4324230176463739164, guid: 1338f5be9851824478e8d4a305df7e4f, type: 3}
 --- !u!114 &8342554820484392984
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -382,7 +383,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isGhost: 0
-  storedGravity: 3
   ghostMoveSpeed: 25
   ghostTransitionFX: {fileID: 100000, guid: 83cd9cc9f9c88824ba18dc59b05ae328, type: 3}
   humanTransitionFX: {fileID: 3074256415086300790, guid: 1f223433b566d834ca60513596cd30c4, type: 3}

@@ -27,13 +27,18 @@ public class PlayerMovement : MonoBehaviour
 
     SoundManagement soundManagement; // Reference to SoundManagement script
 
+    DialogueManager dialogueManager; // Reference to DialogueManager script
+
     float landTimer = 0f; // Timer that starts when player is on the ground to prevent multiple land sounds from playing at once
     float startTimer = .2f; // Timer that exists solely to prevent a land sound when the level starts
+
+    [SerializeField] DialogueTrigger cutsceneObject;
 
 
     // Start is called before the first frame update
     void Start()
     {
+        dialogueManager = FindObjectOfType<DialogueManager>();
         myRigidbody = GetComponent<Rigidbody2D>(); // Assign Rigidbody2D reference to a variable by getting this object's component
         myAnimator = GetComponent<Animator>(); // Assign Animator reference to a variable by getting this object's component
         myAudioSource = GetComponent<AudioSource>(); // Assign AudioSource reference to a variable by getting this object's component
@@ -45,66 +50,76 @@ public class PlayerMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        startTimer -= 1 * Time.deltaTime; // Count down the start timer at the same rate regardless of framerate
-        pickupTimer -= 1 * Time.deltaTime; // Count down the pickup timer at the same rate regardless of framerate
-        horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed; // Get the speed and the direction of horizontal movement based on the Horizontal axis
-
-        if (Input.GetButtonDown("Jump") && !GetComponent<Ghost>().ReturnGhost()) // If player presses Jump input
+        if (!cutsceneObject.GetInCutscene())
         {
-            GetComponent<SoundManagement>().PlayRandomJumpSound(); // Play a random jump sound via the method in the SoundManagement script
-            jump = true; // Set the jump variable to true
-        }
+            startTimer -= 1 * Time.deltaTime; // Count down the start timer at the same rate regardless of framerate
+            pickupTimer -= 1 * Time.deltaTime; // Count down the pickup timer at the same rate regardless of framerate
+            horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed; // Get the speed and the direction of horizontal movement based on the Horizontal axis
 
-        if (controller.ReturnMGrounded()) // If player is on the ground based on returned variable in CharacterController2D script
-        {
-            if (landTimer > 0 && startTimer < 0 && !ghost.ReturnGhost()) // If the land timer is greater than 0 and the start timer is less than 0 and the player is not in ghost form based on variable in Ghost script
+            if (Input.GetButtonDown("Jump") && !GetComponent<Ghost>().ReturnGhost()) // If player presses Jump input
             {
-                soundManagement.PlayRandomLandSound(); // Play a random landing sound via the method in the SoundManagement script
-            }
-            landTimer = 0; // Set the land timer to 0
-            myAnimator.SetBool("isFalling", false); // Set the isFalling animator bool to false
-            myAnimator.SetBool("isJumping", false); // Set the isJumping animator bool to false
-            if (myRigidbody.velocity.x != 0) // If the rigidbody of this object currently has horizontal movement
-            {
-                myAnimator.SetBool("isRunning", true); // Set the isRunning animator bool to true
-               
+                GetComponent<SoundManagement>().PlayRandomJumpSound(); // Play a random jump sound via the method in the SoundManagement script
+                jump = true; // Set the jump variable to true
             }
 
-            
-        }
-        else if (!controller.ReturnMGrounded()) // Otherwise, if the player is not on the ground
-        {
-            landTimer += 1 * Time.deltaTime; // Tick up the landing timer at the same rate regardless of framerate
-            if (myRigidbody.velocity.y > 0) // If the rigidbody of this object has upward movement
+            if (controller.ReturnMGrounded()) // If player is on the ground based on returned variable in CharacterController2D script
             {
-                
-                myAnimator.SetBool("isJumping", true); // Set the isJumping animator bool to true
-                myAnimator.SetBool("isRunning", false); // Set the isRunning animator bool to false
-            }
-            else if (myRigidbody.velocity.y < 0) // Otherwise, if the rigidbody of this object has downward movement
-            {
-                myAnimator.SetBool("isFalling", true); // Set the isFalling animator bool to true
-                myAnimator.SetBool("isRunning", false); // Set the isRunning animator bool to true
-            }
-           
-        }
+                if (landTimer > 0 && startTimer < 0 && !ghost.ReturnGhost()) // If the land timer is greater than 0 and the start timer is less than 0 and the player is not in ghost form based on variable in Ghost script
+                {
+                    soundManagement.PlayRandomLandSound(); // Play a random landing sound via the method in the SoundManagement script
+                }
+                landTimer = 0; // Set the land timer to 0
+                myAnimator.SetBool("isFalling", false); // Set the isFalling animator bool to false
+                myAnimator.SetBool("isJumping", false); // Set the isJumping animator bool to false
+                if (myRigidbody.velocity.x != 0) // If the rigidbody of this object currently has horizontal movement
+                {
+                    myAnimator.SetBool("isRunning", true); // Set the isRunning animator bool to true
 
-        if (myRigidbody.velocity.x > -0.4f && myRigidbody.velocity.x < 0.4f && horizontalMove == 0) // If the rigidbody of this object has inperceptible movement
-        {
-            myAnimator.SetBool("isRunning", false); // Don't play the running animation, because the object is not moving enough
-            
+                }
+
+
+            }
+            else if (!controller.ReturnMGrounded()) // Otherwise, if the player is not on the ground
+            {
+                landTimer += 1 * Time.deltaTime; // Tick up the landing timer at the same rate regardless of framerate
+                if (myRigidbody.velocity.y > 0) // If the rigidbody of this object has upward movement
+                {
+
+                    myAnimator.SetBool("isJumping", true); // Set the isJumping animator bool to true
+                    myAnimator.SetBool("isRunning", false); // Set the isRunning animator bool to false
+                }
+                else if (myRigidbody.velocity.y < 0) // Otherwise, if the rigidbody of this object has downward movement
+                {
+                    myAnimator.SetBool("isFalling", true); // Set the isFalling animator bool to true
+                    myAnimator.SetBool("isRunning", false); // Set the isRunning animator bool to true
+                }
+
+            }
+
+            if (myRigidbody.velocity.x > -0.4f && myRigidbody.velocity.x < 0.4f && horizontalMove == 0) // If the rigidbody of this object has inperceptible movement
+            {
+                myAnimator.SetBool("isRunning", false); // Don't play the running animation, because the object is not moving enough
+
+            }
         }
+        
+        
+        
 
         
     }
 
     private void FixedUpdate()
     {
-        if (!GetComponent<Ghost>().ReturnGhost()) // If the player is not a ghost
+        if (!cutsceneObject.GetInCutscene())
         {
-            controller.Move(horizontalMove * Time.fixedDeltaTime, false, jump); // Move the player based on the CharacterController2D's Move method, using the value of move speed and direction, saying "false" to crouching parameter, and the bool dictating whether the player is jumping
-            jump = false; // Set the jump variable to false, and I don't remember why I would do this
+            if (!GetComponent<Ghost>().ReturnGhost()) // If the player is not a ghost
+            {
+                controller.Move(horizontalMove * Time.fixedDeltaTime, false, jump); // Move the player based on the CharacterController2D's Move method, using the value of move speed and direction, saying "false" to crouching parameter, and the bool dictating whether the player is jumping
+                jump = false; // Set the jump variable to false, and I don't remember why I would do this
+            }
         }
+        
         
         
     }
